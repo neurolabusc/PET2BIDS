@@ -6,16 +6,37 @@ from os.path import join
 import pathlib
 import re
 import numpy
+import sys
 
 parent_dir = pathlib.Path(__file__).parent.resolve()
 code_dir = parent_dir.parent
 
+
+def resource_path(relative_path):
+    """ Get absolute path to resource, works for dev and for PyInstaller """
+    try:
+        # PyInstaller creates a temp folder and stores path in _MEIPASS
+        base_path = sys._MEIPASS
+    except AttributeError:
+        base_path = os.path.abspath(".")
+
+    return os.path.join(base_path, relative_path)
+
+
+# development
+dev_json_path = join(code_dir, 'ecat_headers.json')
+
+if path.isfile(dev_json_path):
+    true_path = dev_json_path
+else:
+    true_path = resource_path('ecat_headers.json')
+
 # collect ecat header maps
 try:
-    with open(join(code_dir, 'ecat_headers.json'), 'r') as infile:
+    with open(true_path, 'r') as infile:
         ecat_header_maps = json.load(infile)
 except FileNotFoundError:
-    raise Exception("Unable to load header definitions and map from ecat_headers.json. Aborting.")
+    raise Exception(f"Unable to load header definitions and map from {true_path}. Aborting.")
 
 
 def get_ecat_bytes(path_to_ecat: str):
@@ -256,7 +277,7 @@ def read_ecat(ecat_file: str, calibrated: bool = False):
         # looks like there is more directory to read, collect some more bytes
         next_block = read_bytes(
             path_to_bytes=ecat_file,
-            byte_start=(next_directory_position-1) * 512,
+            byte_start=(next_directory_position - 1) * 512,
             byte_stop=next_directory_position * 512
         )
 

@@ -9,3 +9,9 @@
 
 # env vars,folders,files that should not be committed
 .env
+
+# pyinstaller created folders and files
+dist/
+build/
+# may want to undo this, but for now we are treating .spec files as intermediary files
+*.spec
